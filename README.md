@@ -88,7 +88,8 @@
 | [第10章](docs/10-principles.md) | Forge 経済学の五つの原理 | 五原理の要約と相互関係 |
 | [第11章](docs/11-competitive-landscape.md) | 競合分析 | Bittensor/Akash等との比較、Web 3.0 系譜での位置づけ、AWS/GCP対抗策 |
 | [第12章](docs/12-p2p-architecture.md) | P2P アーキテクチャ | 経済学と技術の接続、iroh QUIC + Noise、既存P2Pプロトコルとの比較 |
-| [第13章](docs/13-open-questions.md) | 残された課題と将来の研究 | 5つの批判的レビューに正面から答える誠実な検討 |
+| [第13章](docs/13-open-questions.md) | 残された課題と将来の研究 | 15 個の構造的・論理的問題への誠実な検討 |
+| [第14章](docs/14-programmable-money.md) | プログラマブルマネーとハイブリッド L2 戦略 | JPYC/USDC/DAI/CBDC との比較、3層ハイブリッド設計 |
 
 ### 付録
 

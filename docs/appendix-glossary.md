@@ -91,4 +91,4 @@
 
 ---
 
-← [第13章：残された課題と将来の研究](13-open-questions.md) | [目次](../README.md) | [付録B：参考文献の系譜](appendix-bibliography.md) →
+← [第14章: プログラマブルマネーとハイブリッド L2 戦略](14-programmable-money.md) | [目次](../README.md) | [付録B：参考文献の系譜](appendix-bibliography.md) →

@@ -56,7 +56,8 @@ forge-economics/
 │   ├── 10-principles.md               ← 第10章：Forge 経済学の五つの原理
 │   ├── 11-competitive-landscape.md    ← 第11章：競合分析（Web 3.0 / クラウド対抗含む）
 │   ├── 12-p2p-architecture.md         ← 第12章：P2P アーキテクチャ
-│   ├── 13-open-questions.md           ← 第13章：残された課題と将来の研究
+│   ├── 13-open-questions.md           ← 第13章：残された課題と将来の研究（15問題）
+│   ├── 14-programmable-money.md       ← 第14章：プログラマブルマネーとハイブリッド L2 戦略
 │   ├── appendix-glossary.md           ← 付録A：用語対応表
 │   └── appendix-bibliography.md       ← 付録B：参考文献の系譜
 └── docs/books/                        ← （予約）
