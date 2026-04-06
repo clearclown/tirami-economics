@@ -1,5 +1,8 @@
 # Forge 経済学仕様書
 
+> **⚠️ FROZEN — Version 0.1 (Parts 1-10)**
+> このファイルは v0.1 として凍結されています。最新版は [`forge-economics-spec-v0.2.md`](forge-economics-spec-v0.2.md) を参照してください。
+
 > 従来の経済学を、AI ネイティブ経済の視点から再定義する
 
 *Version 0.1 — 2026 年 4 月*

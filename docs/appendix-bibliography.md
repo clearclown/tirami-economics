@@ -25,9 +25,13 @@ graph LR
     Fuller["フラー<br/>1968<br/>kWh 通貨"]
     Nakamoto["ナカモト<br/>2008<br/>電力→計算→通貨"]
     Piketty["ピケティ<br/>2013<br/>r > g"]
-    Forge["Forge<br/>2026<br/>有用な計算 = 通貨"]
+    Lihu["Lihu et al.<br/>2020<br/>PoUW for AI"]
+    Altman["Altman<br/>2021<br/>Compute as currency"]
+    Bittensor["Bittensor<br/>2021<br/>Subnet incentives"]
+    Forge["Forge<br/>2026<br/>CU = useful compute"]
 
-    Smith --> Ricardo --> Marx --> Walras --> Soddy --> Hayek --> Fuller --> Nakamoto --> Piketty --> Forge
+    Smith --> Ricardo --> Marx --> Walras --> Soddy --> Hayek --> Fuller --> Nakamoto --> Piketty
+    Piketty --> Lihu --> Altman --> Bittensor --> Forge
 ```
 
 <details>
@@ -60,6 +64,15 @@ graph LR
   ↓
 トマ・ピケティ (2013)
   │  r > g と格差の構造
+  ↓
+Lihu et al. (2020)
+  │  PoUW for AI（ML 訓練を PoW に）
+  ↓
+サム・アルトマン (2021)
+  │  コンピュート = 未来の通貨
+  ↓
+Bittensor (2021)
+  │  サブネット型インセンティブ
   ↓
 Forge (2026)
     有用な計算 = 通貨。AI 専用。投機なし。
@@ -177,6 +190,78 @@ Forge (2026)
 
 ---
 
+### Ayres & Warr『The Economic Growth Engine』（2009 年）
+
+**原著:** *The Economic Growth Engine: How Energy and Work Drive Material Prosperity*, Edward Elgar Publishing
+
+**核心的主張:** 経済成長の真の源泉は労働や資本ではなく、「有用な仕事（useful work）」＝エネルギー効率 × エネルギー消費である。これが GDP 成長の主要要因であり、従来の成長会計が見落としてきた「第三の生産要素」である。
+
+**Forge への接続:** ソディ（1926）とフラー（1968）の中間に位置する重要な文献であり、両者の直感をマクロ経済学的な実証研究として完成させた仕事です。Forge の Proof of Useful Work は、Ayres & Warr の「有用な仕事こそが経済の本質」という洞察を AI ネイティブに実装したものと言えます。彼らが「useful work = exergy × efficiency」と定式化したように、Forge は「CU = 有用な推論計算 × エネルギー」として実装しています。
+
+**関連する章:** [第2章：貨幣とは何か](02-money.md)、[第7章：経済成長と自己改善](07-growth.md)
+
+---
+
+### Lihu et al.『A Proof of Useful Work for Artificial Intelligence on the Blockchain』（2020 年）
+
+**原著:** arXiv:2001.09244
+
+**核心的主張:** ML モデルの訓練を PoW として使用する設計。マイナーは無意味なハッシュではなく、有用な ML 計算を実行する。ブロックチェーンのセキュリティを保ちながら、計算リソースを実社会に還元できる。
+
+**Forge への接続:** Forge の Proof of Useful Work の学術的先駆です。Lihu らは「訓練」を PoW の対象としましたが、Forge は「推論」に焦点を当てる点が本質的に異なります。訓練は検証コストが高く（結果の再現が困難）、推論は検証コストが低い（同じ入力で同じ出力が得られる）ため、Forge の方が実装可能性が高いと言えます。また Forge はブロックチェーンを前提とせず、ローカル台帳＋ゴシップ＋デュアル署名で実現する点も異なります。
+
+**関連する章:** [第4章：労働と剰余価値](04-labor.md)
+
+---
+
+### サム・アルトマン『Moore's Law for Everything』（2021 年）
+
+**原著:** blog post on samaltman.com
+
+**核心的主張:** AI は知能のコストを劇的に下げる。コンピュートが新しい基軸資源（new fundamental resource）になり、政府はすべての市民に対して計算資源への普遍的アクセス（universal basic compute）を保証すべきである。
+
+**Forge への接続:** アルトマンの「コンピュートは未来の通貨になる」という洞察を、Forge は実装レベルで実現しています。彼が提案した「コンピュートへの普遍的アクセス」を、Forge のウェルカムローン（新規参加ノードへの無利子 CU 貸付）が体現しています。国家による再分配ではなく、プロトコル自体が参加者へ基礎的な計算能力を付与する設計は、アルトマンの構想を中央集権なしに実現する試みです。
+
+**関連する章:** [第2章：貨幣とは何か](02-money.md)、[第10章：五つの原理](10-principles.md)
+
+---
+
+### Bittensor Whitepaper『A Peer-to-Peer Intelligence Market』（2021 年）
+
+**原著:** bittensor.com whitepaper, by Yuma Rao
+
+**核心的主張:** 分散 AI のサブネット型インセンティブ設計。TAO トークンを用いた validator-miner エコシステムにより、機械学習モデルの市場を分散的に構築する。
+
+**Forge への接続:** Bittensor は「AI 推論にトークンを与える」最初の本格的な実装であり、Forge の直接的な先行研究です。しかし Forge は同じ問題に対して、トークンを使わない解（CU ＝ 直接的な計算記録）を採用します。Bittensor で指摘されている validator gaming 問題（検証者が結託して報酬を歪める）を、Forge は構造的に回避します——なぜなら CU はトークン価格に依存せず、実際に実行された推論そのものが単位だからです。投機レイヤーが存在しないため、ゲーム理論的な攻撃ベクトルが根本的に異なります。
+
+**関連する章:** [第11章：既存プロトコルとの比較](11-comparison.md)
+
+---
+
+### Sharma『The Quantum Reserve Token』（2025 年）
+
+**原著:** arXiv:2503.22056
+
+**核心的主張:** 量子計算能力を準備資産（reserve asset）とするデジタル通貨の提案。希少で生産的な物理的資源を貨幣の裏付けにすることで、法定通貨とも暗号通貨とも異なる第三の通貨設計を示す。
+
+**Forge への接続:** 同じ思想の「量子計算版」です。Forge は古典計算（LLM 推論）に焦点を当てる点で異なりますが、「物理的な計算能力 ＝ 通貨の裏付け」という核心的な主張は共有しています。Sharma が量子コンピュータの希少性を裏付けとしたのに対し、Forge は「今日すでに広く存在する GPU・NPU・Apple Silicon」を裏付けとする点で、実装可能性が圧倒的に高いと言えます。両者は「物理資源裏付け通貨」という同じ家系に属します。
+
+**関連する章:** [第2章：貨幣とは何か](02-money.md)、[第10章：五つの原理](10-principles.md)
+
+---
+
+### Xu『The Agent Economy』（2026 年）
+
+**原著:** arXiv:2602.14219
+
+**核心的主張:** AI エージェントが自律的に経済活動を行う世界における経済学的フレームワーク。エージェント間の取引、信用、投資、評判形成といった経済行動を、人間経済のアナロジーではなく「エージェントネイティブ」に再定式化する理論。
+
+**Forge への接続:** Forge が実装しようとしている「AI ネイティブ経済」の理論的記述と言えます。エージェントを完全な経済主体（full economic actor）として扱う点が Forge の設計と一致しています。Xu が理論として記述した経済を、Forge は CU を媒介として実装します。Xu のフレームワークにおける「エージェント間信用」は、Forge の CU 貸付システム（デュアル署名＋ゴシップ同期の LoanRecord）にほぼ直接対応します。
+
+**関連する章:** [第9章：四つの経済主体](09-actors.md)、[第10章：五つの原理](10-principles.md)
+
+---
+
 ## 思想の収束
 
 これらの著作は、異なる時代に異なる問題意識から書かれました。しかし Forge の設計において、それらは一つの体系に収束します。
@@ -192,6 +277,12 @@ Forge (2026)
 | エネルギー通貨 | フラー | 計算を貨幣単位にする |
 | 計算による通貨 | ナカモト | 有用な計算による通貨（PoUW） |
 | 格差の構造 | ピケティ | 収穫逓減による格差圧縮 |
+| 有用な仕事としての成長 | Ayres & Warr | CU ＝ 有用な推論 × エネルギー |
+| ML 計算の PoW 化 | Lihu et al. | 推論ベース PoUW（検証コスト最小化） |
+| コンピュート＝通貨 | アルトマン | ウェルカムローンによる普遍的アクセス |
+| 分散 AI 市場 | Bittensor | トークンなしの CU 直接記録 |
+| 物理資源裏付け通貨 | Sharma | 古典計算（LLM 推論）を裏付けに |
+| エージェント経済理論 | Xu | CU を媒介とした AI エージェント経済 |
 
 250 年の経済思想が、一つのプロトコルに結実しています。
 
