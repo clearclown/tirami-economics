@@ -118,10 +118,179 @@ effective_price = base_cu_per_token × demand_factor / supply_factor
 
 ---
 
+---
+
+## 10. 金融商品レイヤー (forge-bank / L2)
+
+`forge-bank` crate (Rust, `crates/forge-bank/`) が参照する定数。
+戦略、ポートフォリオ、先物、保険、リスクモデル、yield オプティマイザのシングルソース。
+
+### 10.1 リスク許容度 (RiskTolerance)
+
+| パラメータ | 値 | 説明 |
+|----------|-----|------|
+| `risk_multiplier_conservative` | 0.5 | Conservative 戦略のコミット上限倍率 |
+| `risk_multiplier_balanced` | 0.8 | Balanced のコミット上限倍率 |
+| `risk_multiplier_aggressive` | 1.0 | Aggressive のコミット上限倍率 |
+
+### 10.2 戦略 (Strategy)
+
+| パラメータ | 値 | 説明 |
+|----------|-----|------|
+| `conservative_max_commit_fraction` | 0.30 | Conservative: cash の最大 30% のみ貸出 |
+| `conservative_reserve_threshold` | 0.60 | プール準備率がこれ未満なら HOLD |
+| `highyield_base_commit_fraction` | 0.50 | HighYield: cash の 50% をベースに貸出 |
+| `highyield_lend_threshold` | 0.40 | プール準備率がこれ超ならレンド |
+| `highyield_borrow_rate_threshold` | 0.002 | 自分の offered_rate がこれ未満なら借入機会 |
+| `highyield_borrow_cash_fraction` | 0.50 | 借入時 cash の 50% まで |
+
+### 10.3 先物 (FuturesContract)
+
+| パラメータ | 値 | 説明 |
+|----------|-----|------|
+| `default_margin_fraction` | 0.10 | デフォルト必要証拠金率 (10%) |
+| `margin_fraction_range` | (0, 1) | 証拠金率の有効範囲 (両端除外) |
+
+PnL 式 (ゼロサム保証):
+```
+long_pnl  = (settlement_price − strike_price) × notional
+short_pnl = −long_pnl
+```
+
+### 10.4 保険 (InsurancePolicy)
+
+| パラメータ | 値 | 説明 |
+|----------|-----|------|
+| `insurance_base_rate` | 0.02 | 基礎料率 (2%) |
+| `insurance_risk_premium` | 0.10 | 最大リスクプレミアム (10%) |
+| `insurance_min_premium` | 1 CU | 最小プレミアム (floor 後の保証) |
+
+料率式:
+```
+rate    = base_rate + (1 − credit_score) × risk_premium
+premium = max(min_premium, floor(coverage × rate))
+```
+
+### 10.5 リスクモデル (RiskModel)
+
+| パラメータ | 値 | 説明 |
+|----------|-----|------|
+| `default_rate` | 0.02 | 想定デフォルト率 (年率 2%) |
+| `loss_given_default` | 0.50 | LGD: デフォルト時損失率 (50%) |
+| `var_99_multiplier` | 2.33 | VaR 99% のスコア係数 (正規分布) |
+
+VaR 式 (独立ベルヌーイ損失):
+```
+expected_loss = floor(total_lent × default_rate × lgd)
+variance      = sum(cu_i² × default_rate × (1 − default_rate))
+std_dev       = sqrt(variance) × lgd
+var_99        = floor(expected_loss + var_99_multiplier × std_dev)
+concentration = max(lent_positions) / total_lent
+```
+
+---
+
+## 11. 自己改善レイヤー (forge-mind / L3)
+
+`forge-mind` crate (Rust, `crates/forge-mind/`) が参照する定数。
+AutoAgent スタイルの自己改善ループが CU を消費する際のハード上限。
+
+### 11.1 CU Budget (ハード上限)
+
+| パラメータ | 値 | 説明 |
+|----------|-----|------|
+| `max_cu_per_cycle` | 5,000 CU | 1 改善サイクルで使える CU 上限 |
+| `max_cu_per_day` | 50,000 CU | 1 日あたりの CU 上限 |
+| `max_cycles_per_day` | 20 | 1 日あたりの改善サイクル上限 |
+| `budget_day_rollover_hours` | 24 | 日次リセット周期 |
+
+### 11.2 ROI ゲート
+
+| パラメータ | 値 | 説明 |
+|----------|-----|------|
+| `min_score_delta` | 0.01 | ベンチマークスコア改善の最小値 (これ未満は棄却) |
+| `min_roi_threshold` | 1.0 | 投資回収の最小比率 (cu_return / cu_invested) |
+| `roi_cu_per_score_unit` | 100,000 CU | スコア 1.0 改善あたりの想定 CU リターン換算 |
+
+判定ルール:
+```
+if score_delta < min_score_delta:          reject
+if cu_invested <= 0 and score_delta > 0:   accept (無料の改善)
+roi = cu_return_estimate / cu_invested
+return roi >= min_roi_threshold
+```
+
+### 11.3 can_spend ゲート (全て真のとき許可)
+
+1. `cu_amount > 0`
+2. `cu_amount <= max_cu_per_cycle`
+3. `spent_today + cu_amount <= max_cu_per_day`
+4. `cycles_today < max_cycles_per_day`
+
+---
+
+## 12. エージェント市場レイヤー (forge-agora / L4)
+
+`forge-agora` crate (Rust, `crates/forge-agora/`) が参照する定数。
+レピュテーション集約と capability マッチングのシングルソース。
+
+### 12.1 レピュテーション重み (sum = 1.0)
+
+| パラメータ | 値 | 説明 |
+|----------|-----|------|
+| `rep_weight_volume` | 0.40 | 取引総量のウェイト |
+| `rep_weight_recency` | 0.30 | 最近の活動度 |
+| `rep_weight_diversity` | 0.20 | カウンターパーティの多様性 |
+| `rep_weight_consistency` | 0.10 | 取引間隔の一貫性 |
+| `new_agent_reputation` | 0.30 | 取引履歴ゼロの新規エージェントの初期値 |
+
+### 12.2 レピュテーション計算パラメータ
+
+| パラメータ | 値 | 説明 |
+|----------|-----|------|
+| `volume_cap_cu` | 100,000 CU | volume スコアが 1.0 に飽和する閾値 |
+| `recency_half_life_ms` | 24 時間 | recency 半減期 |
+| `diversity_cap` | 10 | diversity が 1.0 に飽和するユニーク相手数 |
+| `consistency_min_trades` | 2 | これ未満は consistency = 0 |
+
+サブスコア式:
+```
+volume      = min(1.0, total_cu / volume_cap_cu)
+recency     = 0.5^(age_ms / recency_half_life_ms)
+diversity   = min(1.0, unique_counterparties / diversity_cap)
+cv          = stdev(intervals) / mean(intervals)
+consistency = max(0, 1 − cv / 2)
+reputation  = 0.4 × volume + 0.3 × recency + 0.2 × diversity + 0.1 × consistency
+```
+
+### 12.3 Capability マッチャー
+
+| パラメータ | 値 | 説明 |
+|----------|-----|------|
+| `match_quality_weight` | 0.60 | 合成スコアにおける reputation ウェイト |
+| `match_cost_weight` | 0.40 | 合成スコアにおける price_score ウェイト |
+| `price_score_tier_multiplier` | 4.0 | tier.base × 4 を price_score の 0 点に設定 |
+
+ハードフィルタ:
+1. tier が指定されていれば完全一致
+2. `cu_per_token <= max_cu_per_token`
+3. モデル名が任意のクエリパターン (fnmatch) にマッチ
+
+スコア式:
+```
+price_score = max(0, 1 − cu_per_token / (tier.base × price_score_tier_multiplier))
+composite   = match_quality_weight × reputation + match_cost_weight × price_score
+```
+
+---
+
 ## 変更履歴
 
 - v0.1 (2026-04): 初版作成 (M-6)
-- v0.2 (TBD): spec v0.2 への統合
+- v0.2 (2026-04-07): §10 (forge-bank), §11 (forge-mind), §12 (forge-agora) を追加。
+  L2/L3/L4 の Rust 書き直し (clearclown/forge workspace crates 化) に伴うシングル
+  ソース統合。Python スキャフォールド (forge-bank/forge-mind/forge-agora) にあった
+  全定数をここに集約。
 
 ---
 
@@ -135,3 +304,9 @@ effective_price = base_cu_per_token × demand_factor / supply_factor
 - docs/05-banking.md (レンディング全般)
 - docs/06-exchange.md (為替)
 - docs/07-growth.md (収穫逓減 yield)
+
+このファイルを参照する Rust クレート (clearclown/forge workspace):
+- `crates/forge-ledger/src/lending.rs` — §3〜§7 (lending primitives)
+- `crates/forge-bank/src/*.rs` — §10 (strategies, futures, insurance, risk)
+- `crates/forge-mind/src/*.rs` — §11 (CU budget, ROI gates)
+- `crates/forge-agora/src/*.rs` — §12 (reputation, capability matching)
