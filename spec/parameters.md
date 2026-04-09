@@ -284,6 +284,50 @@ composite   = match_quality_weight × reputation + match_cost_weight × price_sc
 
 ---
 
+## 13. サンプリングパラメータ (Phase 11, forge-node 推論レイヤー)
+
+`crates/forge-node/src/api.rs` が参照する定数。
+OpenAI 互換サンプリングと Phase 12 のファンクションコーリングのシングルソース。
+
+### 13.1 OpenAI 互換サンプリング
+
+これらのパラメータは `OpenAIChatRequest` から `forge-infer` エンジントレイトの
+llama.cpp サンプラーチェーンに転送される。トークン分布（= 1 リクエストあたりの CU 消費）
+に影響するが、台帳のコスト関数（`estimate_cost(tokens, 1, 1)`）には直接影響しない。
+
+| パラメータ | デフォルト | 範囲 | 意味 |
+|----------|---------|-------|-----------|
+| `temperature` | 0.7 | [0.0, 2.0] | ロジットの softmax 温度。0 = 貪欲デコード |
+| `top_p` | None | (0.0, 1.0] | 核サンプリング閾値 |
+| `top_k` | None | 正の整数 | Top-k サンプリングカットオフ |
+| `max_tokens` | 256 | 正の整数 | 生成トークン数のハードキャップ |
+
+`top_k` と `top_p` の両方が設定された場合、llama.cpp サンプラーチェーンは
+`[top_k, top_p, temp, dist]` の順に適用される。
+
+### 13.2 ストリーミング
+
+| パラメータ | デフォルト | 意味 |
+|----------|---------|-----------|
+| `stream` | false | true の場合、レスポンスは `generate_streaming()` 経由の実トークン逐次 SSE チャンクとして送信される（Phase 11 で擬似ストリーミングから実装を刷新） |
+
+ストリーミングリクエストの CU 会計: 台帳のトレードレコードはストリーム完了後に書き込まれ、
+`generate_streaming()` が報告する実際のトークン数を使用する。
+
+### 13.3 ファンクションコーリング (Phase 12 A1)
+
+| パラメータ | デフォルト | 意味 |
+|----------|---------|-----------|
+| `tools` | None | OpenAI 形式のツール定義の配列（name/description/JSON schema parameters） |
+| `tool_choice` | "auto" | "auto" / "none" / "required" / 特定の関数名 |
+
+ツール定義はシンプルなテンプレートによってシステムプロンプトに注入される。
+モデルの出力に `<tool_call>...</tool_call>` マーカーが含まれる場合、
+レスポンスは `choices[0].message.tool_calls` に変換され、
+`finish_reason: "tool_calls"` として返される。
+
+---
+
 ## 変更履歴
 
 - v0.1 (2026-04): 初版作成 (M-6)
@@ -291,6 +335,7 @@ composite   = match_quality_weight × reputation + match_cost_weight × price_sc
   L2/L3/L4 の Rust 書き直し (clearclown/forge workspace crates 化) に伴うシングル
   ソース統合。Python スキャフォールド (forge-bank/forge-mind/forge-agora) にあった
   全定数をここに集約。
+- v0.3 (2026-04-09): §13 (Phase 11 サンプリングパラメータ、ストリーミング、Phase 12 ファンクションコーリング) を追加。
 
 ---
 
@@ -310,3 +355,4 @@ composite   = match_quality_weight × reputation + match_cost_weight × price_sc
 - `crates/forge-bank/src/*.rs` — §10 (strategies, futures, insurance, risk)
 - `crates/forge-mind/src/*.rs` — §11 (CU budget, ROI gates)
 - `crates/forge-agora/src/*.rs` — §12 (reputation, capability matching)
+- `crates/forge-node/src/api.rs` — §13 (sampling + streaming + tools)

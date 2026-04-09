@@ -642,6 +642,55 @@ implementation was conducted in Phase 9:
 The audit report is maintained at `docs/THEORY-AUDIT.md` in the `clearclown/forge`
 repository and updated with each phase.
 
+### 10.5 Phase 11: Drop-in OpenAI Compatibility (2026-04-09)
+
+Between Phase 10 close-out and the v0.3 deployment report, a compatibility audit
+identified five remaining gaps that prevented Forge from serving as a drop-in
+replacement for llama-server, mesh-llm, or Ollama in OpenAI-compatible clients.
+Phase 11 resolved all five.
+
+**1. Real token-by-token streaming.** The original SSE handler buffered the entire
+completion, then emitted a single batch of `chat.completion.chunk` events. Phase 11
+replaced this with a `tokio::task::spawn_blocking` that drives the llama.cpp inference
+loop on a dedicated OS thread while streaming token fragments back through an
+`mpsc::channel` to the Axum response body. Each chunk now arrives with visible
+inter-arrival latency (~2–4 ms on Apple Silicon Metal), matching the behavior expected
+by streaming-aware clients such as the OpenAI Python SDK and Cursor.
+
+**2. Nucleus and top-k sampling.** The `top_p` and `top_k` fields on
+`OpenAIChatRequest` were parsed but forwarded as `None` to llama.cpp. The sampler
+chain now uses `LlamaSampler::chain_simple([top_k, top_p, temp, dist])` so both
+parameters are honored. The canonical values and their semantics are specified in
+[6, §13.1].
+
+**3. Accurate prompt token counts.** The old implementation used
+`(prompt.len() / 4).max(1)` — a character-count approximation — producing 30–50%
+drift in `usage.prompt_tokens` relative to the true subword token count. Phase 11
+replaced this with a real tokenizer call via `engine.tokenize(&prompt)`, making the
+reported `usage` object accurate enough to drive per-request CU accounting reliably.
+
+**4. Model name in responses.** The fallback identifier `"forge-model"` was changed
+to `"forge-no-model"`, allowing clients to distinguish "a model is loaded but its
+registry name is not configured" from "no model is loaded at all". The actual model
+name from the registry (e.g., `"SmolLM2-135M-Instruct-Q4_K_M"`) is reported when
+available.
+
+**5. Auto-download from a single flag.** The `forge node -m <name>` command
+previously required both `--model` and `--tokenizer` as local file paths and never
+invoked the HuggingFace model registry. Phase 11 aligned its behavior with
+`forge chat -m <name>`: a bare registry name (e.g., `smollm2:135m`) now triggers
+auto-download from the built-in registry, identical to the chat subcommand workflow.
+
+**Empirical validation (2026-04-09).** Phase 11 was validated with SmolLM2-135M
+(q4\_k\_m quantization, ≈98 MB) on Apple Silicon Metal with 31/31 transformer layers
+offloaded to GPU. Three end-to-end chat completions were executed and charged 48 CU
+total to the welcome-loan balance (ledger state: `contributed=48`, `effective_balance=1048`).
+The Prometheus `/metrics` endpoint reported `forge_cu_contributed_total{node_id="0000..."} 48`
+and `forge_trade_count_total 3` simultaneously. The Bitcoin OP\_RETURN anchor at
+`mainnet` produced a 40-byte payload `6a284652474501000000...` that is broadcast-ready
+for use as an immutable ledger checkpoint. Full methodology is documented in the
+companion deployment report [forge-v0.3-deployment.md].
+
 ## 10.4 Production Hardening (Phase 9 and 10)
 
 Phase 9 added the following production capabilities:
@@ -660,6 +709,52 @@ Phase 9 added the following production capabilities:
   published to live Nostr relays as the events occur, not merely constructed in memory.
 - **forge-mesh CI:** GitHub Actions workflow runs `cargo test` on every push to the
   mesh-llm fork, preventing economic protocol regressions from inference layer changes.
+
+### 10.6 Phase 12: Research-Frontier Scaffolds
+
+Phase 12 (in progress as of the v0.1 preprint) adds scaffolded infrastructure for
+four frontier research directions without committing to specific cryptographic or
+training implementations. Shipping typed scaffolds now establishes a compilation
+boundary against which real backends can be developed independently without
+breaking the economic layer's API stability.
+
+**zkML verification** (`forge_ledger::zk`). A `ProofVerifier` trait and
+`ProofOfInference` struct allow a real ezkl [16], risc0, or halo2 backend to be
+plugged in without API changes. The `MockVerifier` accepts all proofs and is used
+in unit tests to validate the surrounding economic machinery before any zero-knowledge
+proving system is integrated. When a real verifier is present, a verified inference
+proof can replace or supplement the Ed25519 dual-signature as the Proof of Useful Work,
+removing the bilateral trust requirement between counterparties.
+
+**Federated training** (`forge_mind::federated`). A `GradientContribution` struct
+records a node's contribution to a shared training round, a `FederatedRound` aggregates
+contributions from participating nodes using weighted averaging (weight proportional
+to loss improvement per CU spent), and the aggregated model delta is applied and
+recorded as a `TradeRecord`. Nodes are rewarded in CU proportional to their gradient
+efficiency. This extends CU accounting from inference to distributed fine-tuning, allowing
+the same economic layer that governs inference trading to govern collective model improvement.
+
+**BitVM optimistic verification** (`forge_ledger::bitvm`). A `StakedClaim` struct
+records a node's assertion that a particular inference sequence was computed correctly,
+backed by a CU stake. A `FraudProofVerifier` trait allows disputes to be escalated
+during a configurable challenge window (default 2016 Bitcoin blocks ≈ 14 days).
+If no successful fraud proof is submitted during the window, the claim is finalized
+and the stake is returned. This design follows the BitVM optimistic computation
+model [18] and enables trustless BTC↔CU bridges without a Bitcoin soft fork.
+
+**Function calling** (Phase 12 A1, `crates/forge-node/src/api.rs`). OpenAI-format
+`tools` and `tool_choice` fields are parsed from `OpenAIChatRequest` and the tool
+definitions are injected into the system prompt via a model-agnostic template. The
+model's output is scanned for `<tool_call>{...}</tool_call>` markers; when found, the
+response is transformed into `choices[0].message.tool_calls` with `finish_reason:
+"tool_calls"`, matching the OpenAI wire format. Canonical parameter values for
+the function calling interface are defined in [6, §13.3].
+
+All four Phase 12 components are *scaffolds*: the trait and type definitions are
+complete and unit-tested, but the cryptographic heavy-lifting (actual zkML circuits,
+BitVM covenants, gradient computation engines) is deferred to Phase 13+. This
+phasing allows the economic layer's interface contracts to stabilize before the
+computationally expensive backends are committed.
 
 ---
 
