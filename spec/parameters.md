@@ -328,14 +328,89 @@ llama.cpp サンプラーチェーンに転送される。トークン分布（=
 
 ---
 
+## 14. 供給曲線 (Supply Curve) — Phase 13
+
+| パラメータ | 値 | 説明 |
+|---|---|---|
+| `total_trm_supply` | 21,000,000,000 | TRM の総発行上限 (Bitcoin 21M × 1000) |
+| `supply_factor_formula` | `1 - minted / cap` | mint rate の減衰係数 |
+| `transaction_fee_rate` | 0.01 (1%) | supply 枯渇後の取引手数料率 |
+| `fee_activation_threshold` | 0.1 | supply_factor がこれ以下で手数料活性化 |
+
+---
+
+## 15. 利回り半減期 (Yield Halving) — Phase 13
+
+| パラメータ | 値 | 説明 |
+|---|---|---|
+| `initial_yield_rate` | 0.001 (/hr × reputation) | Epoch 0 の availability yield |
+| `halving_trigger` | cumulative TRM minted | 半減期のトリガー条件 |
+| `epoch_0_threshold` | 10,500,000,000 | Epoch 0 → 1 の閾値 (supply の 50%) |
+| `epoch_formula` | `floor(log2(cap / (cap - minted)))` | Epoch 番号の計算式 |
+
+---
+
+## 16. ステーキング (Staking) — Phase 13
+
+| パラメータ | 値 | 説明 |
+|---|---|---|
+| `staking_7d_min` | 100 TRM | 7 日ロックの最小量 |
+| `staking_7d_multiplier` | 1.2 | 7 日ロックの reputation 倍率 |
+| `staking_30d_min` | 1,000 TRM | 30 日ロック最小量 |
+| `staking_30d_multiplier` | 1.5 | 30 日ロック倍率 |
+| `staking_90d_min` | 10,000 TRM | 90 日ロック最小量 |
+| `staking_90d_multiplier` | 2.0 | 90 日ロック倍率 |
+| `staking_365d_min` | 100,000 TRM | 365 日ロック最小量 |
+| `staking_365d_multiplier` | 3.0 | 365 日ロック倍率 |
+| `slash_rate_minor` | 0.05 | trust_penalty 0.1-0.2 の slash 率 |
+| `slash_rate_major` | 0.20 | trust_penalty 0.2-0.4 |
+| `slash_rate_critical` | 0.50 | trust_penalty 0.4-0.5 |
+
+---
+
+## 17. 紹介ボーナス (Referral) — Phase 13
+
+| パラメータ | 値 | 説明 |
+|---|---|---|
+| `referral_bonus_trm` | 100 | 紹介ボーナス (新規 mint, cap 内) |
+| `referral_max_per_node` | 50 | 1 ノードが紹介できる上限 |
+| `referral_cooldown_hours` | 24 | 紹介間の最小間隔 |
+| `referral_earn_threshold` | 1,000 TRM | 被紹介者がこれだけ稼いだらボーナス発動 |
+
+---
+
+## 18. レアリティスコア (Rarity Scoring) — Phase 13
+
+| パラメータ | 値 | 説明 |
+|---|---|---|
+| `rarity_common_multiplier` | 1.0 | Small tier (< 3B params) |
+| `rarity_uncommon_multiplier` | 1.5 | Medium tier (3-14B) |
+| `rarity_rare_multiplier` | 3.0 | Large tier (14-70B) |
+| `rarity_legendary_multiplier` | 10.0 | Frontier tier (70B+) |
+
+---
+
+## 19. ガバナンスエポック (Governance) — Phase 13
+
+| パラメータ | 値 | 説明 |
+|---|---|---|
+| `governance_epoch_sync` | halving | ガバナンスエポック = 半減期エポックと同期 |
+| `governance_min_reputation` | 0.7 | 投票に必要な最低 reputation |
+| `governance_min_stake` | 1,000 TRM | 投票に必要な最低ステーク |
+| `seniority_1_epoch_bonus` | 1.5 | 1-2 エポック経験のシニオリティ |
+| `seniority_3_epoch_bonus` | 2.0 | 3+ エポック経験のシニオリティ |
+
+---
+
 ## 変更履歴
 
 - v0.1 (2026-04): 初版作成 (M-6)
-- v0.2 (2026-04-07): §10 (forge-bank), §11 (forge-mind), §12 (forge-agora) を追加。
-  L2/L3/L4 の Rust 書き直し (clearclown/forge workspace crates 化) に伴うシングル
-  ソース統合。Python スキャフォールド (forge-bank/forge-mind/forge-agora) にあった
-  全定数をここに集約。
-- v0.3 (2026-04-09): §13 (Phase 11 サンプリングパラメータ、ストリーミング、Phase 12 ファンクションコーリング) を追加。
+- v0.2 (2026-04-07): §10-§12 追加 (L2/L3/L4 Rust rewrite)
+- v0.3 (2026-04-09): §13 追加 (Phase 11/12 サンプリング + ファンクションコーリング)
+- v0.4 (2026-04-13): §14-§19 追加 (Phase 13 Growth Incentives)。
+  Supply cap 21B TRM、半減期、ステーキング、Slashing、紹介ボーナス、
+  レアリティスコア、ガバナンスエポック。
+  詳細は `spec/tokenomics.md` と `spec/game-theory.md` を参照。
 
 ---
 
