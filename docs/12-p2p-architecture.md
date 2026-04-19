@@ -349,20 +349,47 @@ Tirami のノード ID は **Ed25519 公開鍵そのもの** です。
 
 ### ピア発見
 
-Tirami の現時点でのピア発見は次の三段階です。
+Tirami の現時点でのピア発見は次の段階を経ます:
 
 ```
   1. ユーザーが既知のピアアドレスを直接指定
-       例: tirami connect <node-id>@<addr>
+       例: tirami worker --seed <public-key-hex>
 
   2. mDNS により LAN 内のピアを自動発見
-       iroh の mdns address lookup が処理
+       iroh の mDNS address lookup が処理
+       (WAN 越えは iroh-canary の n0 DNS TXT record ベース)
 
   3. 接続後、相手から Welcome メッセージで known_peers を受信
        → そのリストから次の接続候補を得る（口コミ式の発見）
+
+  4. Phase 19: PriceSignal.http_endpoint による HTTP エンドポイント広告
+       → gossip で受信した PriceSignal に http_endpoint フィールドが
+          付いていれば、その URL で OpenAI 互換 REST 経由でも
+          そのピアに到達できる (select_provider → peer_http_endpoint
+          で自動解決される)。iroh P2P と HTTP REST の両方の経路が
+          開く。
 ```
 
 将来的には DHT による広域発見、Bootstrap ノードの集合運用などが Issue として議論されています。
+
+### HTTP → P2P フォワーディング (Phase 19 Tier C)
+
+Phase 19 で Tirami は「HTTP API は local engine で model をロード済みでないと動かない」という制約を解消しました。ローカルエンジンにモデルがない状態で `POST /v1/chat/completions` を受けると、ノードは:
+
+```
+  1. peer registry から PriceSignal を持つ peer を探す
+     (select_provider(model_id, max_tokens, local_node_id))
+  2. その peer の http_endpoint または P2P iroh アドレスを解決
+  3. PipelineCoordinator::request_inference で InferenceRequest を送信
+  4. peer の handle_inference が推論を実行
+  5. peer が TradeProposal を送信 (provider 署名つき)
+  6. こちら側が counter-sign して TradeAccept 送信 → dual-signed trade
+  7. TokenStream 受信 → HTTP response としてクライアントに返す
+```
+
+これにより **worker node (モデル未ロード) も OpenAI 互換 REST エンドポイントを提供でき、裏で自動的にメッシュの中から適切な provider を選んで forward する** という構造が完成しました。ユーザーアプリケーション側から見ると、ただの OpenAI API ですが、バックエンドは分散推論メッシュで dual-signed trade が走っています。
+
+実装: `tirami-node/src/api.rs::forward_chat_to_peer` (Phase 19 Tier-C で追加)。Dispatcher ベースの TradeAccept ルーティングは `tirami-node/src/pipeline.rs::TradeAcceptDispatcher` (Phase 18.5-pt3 / #80 で修正)。
 
 ### 暗号化レイヤー
 

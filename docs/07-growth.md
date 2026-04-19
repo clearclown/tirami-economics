@@ -624,6 +624,38 @@ Tirami の自己改善にも、この法則が強力に働きます。
   → 追いつくコストは、逃げ切るコストより遥かに安い
 ```
 
+### 供給曲線による TRM 発行の自動減衰
+
+収穫逓減は個別エージェントの自己改善だけでなく、**ネットワーク全体の TRM 発行量**にも組み込まれています。`tirami-ledger` の供給曲線は次のように単純で、新規発行に効く減衰係数 `supply_factor` を生成します。
+
+```rust
+// tirami-ledger/src/tokenomics.rs
+pub fn supply_factor(total_minted: u64) -> f64 {
+    if total_minted >= TOTAL_TRM_SUPPLY {
+        return 0.0;
+    }
+    1.0 - (total_minted as f64 / TOTAL_TRM_SUPPLY as f64)
+}
+```
+
+具体的な挙動:
+
+| 累計発行量 | supply_factor | 新規発行 1 TRM のコスト (概念) |
+|---|---|---|
+| 0 (ジェネシス) | 1.000 | 基準 |
+| TOTAL の 50% (10.5 B) | 0.500 | 基準の 2 倍の compute で 1 TRM |
+| TOTAL の 75% (15.75 B) | 0.250 | 4 倍の compute |
+| TOTAL の 87.5% (18.375 B) | 0.125 | 8 倍の compute (= エポック 2、welcome loan sunset) |
+| TOTAL の 99% (20.79 B) | 0.010 | 100 倍の compute |
+| TOTAL = 21 B | 0.000 | 新規発行不可能 |
+
+この減衰曲線は、Bitcoin の半減期と同じ思想ですが連続的です。またこの式と閾値 (`TOTAL_TRM_SUPPLY`) は **Constitutional parameter** に登録されており、governance 提案で変更できません (§15、spec §20 参照)。
+
+経済学的含意:
+- 発行速度の自動減速は「インフレ圧力を上限なしで生む」構造を排除する。
+- 経路依存性がない: ネットワークが何度誰に支配されても、残存 TRM 供給は同じ関数で決まる。
+- 予測可能性: 貢献者は「ある時点で新規発行される TRM は概ねこれくらい」と**仕様から逆算できる**。中央銀行の金融政策のような裁量が入る余地がない。
+
 ---
 
 ## 7.5 なぜ違うのか

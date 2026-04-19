@@ -803,6 +803,18 @@ Tirami には中央銀行がありません。TRM の供給は物理法則と
   └──────────────────────────────────────────────────────┘
 ```
 
+### 供給上限の憲法的ガード (Phase 18.1)
+
+TRM の総供給量は **21,000,000,000 (21 B)** に制限されています。この上限値は Phase 18.1 で **Constitutional parameter** に指定され、**governance 提案で変更できません**。仕組みは単純です:
+
+- `tirami-ledger/src/governance.rs` の `IMMUTABLE_CONSTITUTIONAL_PARAMETERS` リスト (18 項目) に `TOTAL_TRM_SUPPLY` が含まれる。
+- 誰が提案しても、`ChangeParameter { name: "TOTAL_TRM_SUPPLY", new_value: ... }` は `create_proposal` で即座に `ConstitutionalParameter` エラーを返す。
+- 変更するには**ソフトウェアをフォーク**する必要があり、フォークした瞬間それは「Tirami」ではない別のネットワークになる (§15 で詳しく扱う)。
+
+同様に、半減期の閾値 (`HALVING_THRESHOLDS`)、FLOPS_PER_CU (10⁹)、slash_rate の下限、署名方式のベース (Ed25519)、canonical bytes の形式なども憲法的に固定されています。これらは Tirami が「中央銀行なしで信頼される通貨になる」ための核心で、コード上で enforce されるラチェットです。
+
+Bitcoin の 2,100 万枚制限が「社会契約」で守られているのに対し、Tirami の 21 B 制限は「コードで強制」されます (§15.3 参照)。
+
 ### TRM 供給の 4 つの経路
 
 TRM は以下の 4 つの経路で経済に入ります：

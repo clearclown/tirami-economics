@@ -164,6 +164,34 @@ TRM レンディングプールの仕組み:
 
 ---
 
+### 9.2.5 プロバイダー資格要件 (Phase 18.2)
+
+「計算機を持てば誰でも TRM を稼げる」というのは初期仕様で、Phase 18.2 以降はそうではありません。TRM を稼ぐプロバイダー (上記の主体 2 か主体 4 のハイブリッド役) は以下のいずれかを満たす必要があります:
+
+```
+プロバイダー資格チェック (tirami-ledger::can_provide_inference):
+
+  プライマリ路: StakingPool に active stake ≥ 100 TRM
+   └→ 違反時は apply_slash で焼かれる → 「皮膚」が入る
+
+  ブートストラップ路: 累計 earn < 10 TRM かつ未 slashed
+   └→ 新規ノードが試験的に稼ぐ枠。10 TRM 到達で stake 必須に。
+
+  失格条件: 過去に 1 度でも slashed された
+   └→ stakeless ブートストラップ路は使えなくなる。
+       stake を積む以外、プロバイダーに復帰できない。
+```
+
+重要な経済効果:
+
+- **違反の抑止**: `StakingPool::apply_slash` (Phase 17 Wave 1.3 で production 配線) は stake を焼くので、ペナルティが実在するのは stake を持つノードだけ。stakeless faucet を使い切ったノードは stake を積まないと稼げないので、「稼ぎたい → stake 必要 → 違反で焼ける」が連鎖。
+- **Skin in the Game**: Nassim Taleb の言う「意思決定者が自分のリスクを引き受ける」構造を経済的に強制する (§16 で詳説)。
+- **参加障壁の段階化**: 完全に stake 0 で Hello World を試す経路は残る (10 TRM まで)。そこから本格稼ぎに移行する段階で 100 TRM の stake を調達する。
+
+なお、この gate (`can_provide_inference`) は 2026-04 現在**実装済みだが HTTP / P2P の trade 実行パスで完全に enforce されていません** — スラッシングループは動作していますが、trade を作る時点で「この provider は資格があるか?」の check は Phase 20 で統合される予定。§16 冒頭の実装ステータス注記を参照。
+
+---
+
 ## 9.3 四主体の関係マップ
 
 ```

@@ -100,6 +100,14 @@
 | エフェメラリゼーション（Ephemeralization） | フラーが提唱した「より少ない資源でより多くを実現する」技術進歩の傾向 | [第2章](02-money.md) |
 | LoanRecord | 貸し手と借り手の双方が署名した融資記録。TradeRecord と同じ設計思想 | [第5章](05-banking.md) |
 | クラウド API アンカー | TRM/USD 為替レートの参照点となるクラウド API 価格（例: Claude API $15/1M トークン） | [第6章](06-exchange.md) |
+| Constitutional Parameter | governance では変更できない不変量。`IMMUTABLE_CONSTITUTIONAL_PARAMETERS` (18 項目) に登録され、変更にはソフトウェアフォークが必要。代表例: `TOTAL_TRM_SUPPLY` (21B)、`FLOPS_PER_CU` (10⁹)、`SLASH_RATE_MAJOR`、`CANONICAL_BYTES_V2` | [第15章](15-constitutional-parameters.md) |
+| ProofPolicy | zkML 証明を trade でどう扱うかのゲート。Disabled / Optional / Recommended / Required の 4 状態。単調増加のみで後退不可 (Constitutional ratchet)。Phase 19 時点のデフォルトは Optional | [第17章](17-proof-of-useful-work.md)、spec §24 |
+| Stakeless Earn Cap | 新規プロバイダーが stake 0 でも稼げる累計上限 (10 TRM)。到達後は 100 TRM stake が必要。過去に slashed された node は失格 | [第16章](16-stake-required-mining.md)、spec §23 |
+| Welcome Loan Sunset | ウェルカムローン発行の恒久停止エポック (エポック 2 = 87.5% 供給発行到達時点)。Constitutional で後戻り不可 | [第16章](16-stake-required-mining.md)、spec §22 |
+| Slash Event | 違反検出時に stake を焼いた記録。`ComputeLedger::slash_events` に persist され、未来の `can_provide_inference` check で参照される | [第16章](16-stake-required-mining.md)、`tirami-ledger/src/ledger.rs` |
+| TradeAcceptDispatcher | seed のメイン recv ループが `TradeAccept` を `handle_inference` タスクに oneshot 経由で配送する仕組み。Phase 18.5-pt3 (#80) で導入、HTTP からの dual-signed trade を可能にした | [第12章](12-p2p-architecture.md)、`tirami-node/src/pipeline.rs` |
+| http_endpoint (PriceSignal) | gossip される PriceSignal に含まれる OpenAI 互換 HTTP エンドポイント URL。peer 自動発見と HTTP → P2P forwarding に使われる。Phase 19 Tier C で導入 | [第12章](12-p2p-architecture.md)、`tirami-core/src/types.rs::PriceSignal` |
+| AUDIT_CLEARANCE | Base mainnet deploy スクリプトが読む環境変数。`yes` が入っていないと `make deploy-base-mainnet` が実行を拒否する。外部セキュリティ監査完了のオペレーター宣言 | [`tirami/repos/tirami-contracts/Makefile`](https://github.com/clearclown/tirami/blob/main/repos/tirami-contracts/Makefile) |
 
 ---
 
