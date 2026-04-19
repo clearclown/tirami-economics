@@ -131,6 +131,10 @@ Tirami 実装 ([clearclown/tirami](https://github.com/clearclown/tirami)) は Ph
 | [第12章](docs/12-p2p-architecture.md) | P2P アーキテクチャ | 経済学と技術の接続、iroh QUIC + Noise、既存P2Pプロトコルとの比較 |
 | [第13章](docs/13-open-questions.md) | 残された課題と将来の研究 | 15 個の構造的・論理的問題への誠実な検討 |
 | [第14章](docs/14-programmable-money.md) | プログラマブルマネーとハイブリッド L2 戦略 | JPYC/USDC/DAI/CBDC との比較、3層ハイブリッド設計 |
+| [第15章](docs/15-constitutional-parameters.md) | 憲法的パラメータ — 変えて良いもの/絶対変えてはならないもの | 21 個の governance-mutable ホワイトリスト + 18 個の憲法的不変 |
+| [第16章](docs/16-stake-required-mining.md) | ステーク必須マイニング — Sybil 耐性の新設計 | Welcome loan sunset、階層的 stake 要件、⚠️ enforce 未完成 |
+| [第17章](docs/17-proof-of-useful-work.md) | 有用な仕事の証明 — zkML への移行 | proof-of-inference の数学、段階的ロールアウト、⚠️ MockBackend のみ |
+| [第18章](docs/18-secondary-markets.md) | 二次市場と open-source のジレンマ | TRM が MIT OSS である限り第三者が取引する可能性、maintainer の立場 |
 
 ### 付録
 
@@ -165,6 +169,19 @@ Tirami 実装 ([clearclown/tirami](https://github.com/clearclown/tirami)) は Ph
 1. [第9章：四つの経済主体](docs/09-actors.md) でアーキテクチャの経済的根拠を理解する
 2. [第5章：銀行と信用](docs/05-banking.md) でサーキットブレーカーの設計思想を確認する
 3. [原典の仕様書](spec/forge-economics-spec.md) で正確な数値・パラメータを参照する
+
+## 論文 PDF (v0.1 working draft)
+
+学術論文版の経済学仕様書 `papers/compute-standard.md` から生成した PDF が手元で閲覧できます:
+
+| 用途 | 成果物 | 説明 |
+|------|--------|------|
+| ローカルレビュー | [`papers/build/compute-standard.pdf`](papers/build/compute-standard.pdf) | STIX Two Math による洗練された数式組版、ローカル閲覧用 |
+| arXiv 提出用 | [`papers/build/compute-standard.arxiv.pdf`](papers/build/compute-standard.arxiv.pdf) | Latin Modern + arXiv 互換、そのまま arXiv に投稿可能な tarball ([`.tar.gz`](papers/build/compute-standard.arxiv.tar.gz)) |
+
+ビルド手順 (pandoc + xelatex) は [`papers/README.md`](papers/README.md) を参照。
+
+---
 
 ## 関連リポジトリ
 
