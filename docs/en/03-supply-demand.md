@@ -190,17 +190,28 @@ Antitrust law, disclosure requirements, licensing regimes, and consumer protecti
 regulations all exist to patch the gaps between real markets and the perfect-competition
 ideal.
 
-Tirami's TRM market requires none of these patches. The five conditions are satisfied by
-design:
+Tirami's TRM market is **designed to approach** the perfect-competition
+ideal more closely than most human markets. The protocol aims for the five
+conditions as follows — these are design targets, not proven properties:
 
-- Homogeneity is guaranteed by the TRM definition in the protocol
-- Perfect information is guaranteed by cryptographic dual-signatures
-- Free entry is guaranteed by the $600 hardware barrier
-- Rationality is guaranteed by deterministic AI execution
+- Homogeneity: the TRM definition in the protocol (1 TRM = 10⁹ FLOP) is
+  intended to hold uniformly across nodes.
+- Information symmetry: cryptographic dual-signatures on trades make
+  individual transactions publicly auditable (though full market
+  observability depends on gossip propagation which is probabilistic).
+- Entry friction: low hardware barrier compared with mainstream proof-of-work
+  systems (a consumer Mac / GPU is enough to participate).
+- Rational behaviour: AI agents following their programmed policies
+  approximate the textbook "rational actor" more closely than humans,
+  though any agent's rationality is only as good as its policy implementation.
 
-The "invisible hand" that Smith described as an emergent property of decentralized human
-exchange is, in the TRM market, a literal implementation: the gossip protocol is the
-invisible hand.
+These are claims **Tirami aims for**, not claims that are cryptographically
+or empirically guaranteed. Please treat this section as a design-intent
+description, not a proof.
+
+The "invisible hand" that Smith described as an emergent property of
+decentralized human exchange maps, in this framing, onto the gossip
+protocol — with all the caveats any real system carries.
 
 ---
 

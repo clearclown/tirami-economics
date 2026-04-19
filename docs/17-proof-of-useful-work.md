@@ -1,5 +1,18 @@
 # 17. Proof of Useful Work — zkML で「嘘をつけない」経済を作る
 
+> ⚠️ **実装ステータス (2026-04-19 現在)**:
+> 本章で論じる **zkML 検証は現状 production にロードされていません**。
+> `tirami-zkml-bench` crate には `MockBackend` (shape テスト用、暗号的に
+> 無効)しかなく、ezkl / risc0 の本番バックエンド統合は **Phase 20+ の
+> 予定** で未実装です。`tirami-ledger::zk::policy_allows_trade()` も
+> 現行 production コードパスから呼ばれていません。
+>
+> したがって本章は**将来の設計意図 (design intent)** を述べるもので
+> あり、「現在動作している機能の説明」ではありません。Tirami の現行
+> lazy-provider 対策は署名済み trade (dual signature) + audit
+> challenge + collusion detector の 3 層のみで (§17.8 に整理)、zkML
+> はその 4 層目として Phase 20+ で追加する計画です。
+
 > Bitcoin の PoW は「無駄な計算」を燃やして信頼を買った。
 > Tirami の PoUW は「役に立つ計算」から信頼を生もうとする。
 > しかしそれを可能にするには、**計算結果が正しいことを暗号的に

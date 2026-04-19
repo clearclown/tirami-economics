@@ -6,9 +6,20 @@ authors:
   - name: contributors
     affiliation: Tirami Protocol
 date: 2026-04-09
-version: "v0.1 (preprint)"
+version: "v0.1 (working draft, not peer-reviewed)"
 license: "MIT (text) / CC-BY-4.0 (figures)"
+status: "UNREVIEWED WORKING DRAFT — design document, not a published paper"
 ---
+
+> **Note on status (2026-04-19)**: This document is a **working
+> draft / protocol design document**. It has **not been peer
+> reviewed**, has not been submitted to arXiv, and has not appeared
+> in any journal or conference. Sections that describe
+> cryptographic primitives (Ed25519 dual-signatures) reflect
+> working code; sections that describe future layers (zkML, ML-DSA,
+> TEE attestation) describe design intent and are **not yet
+> production-wired** — see `README.md § Status Honesty` for the
+> exact split. Please treat this file accordingly.
 
 # Abstract
 

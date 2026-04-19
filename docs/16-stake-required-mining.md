@@ -1,5 +1,22 @@
 # 16. Stake-Required Mining — 経済的皮膚を入れる
 
+> ⚠️ **実装ステータス (2026-04-19 現在)**:
+> `ComputeLedger::can_provide_inference()` のチェック関数は
+> 実装済みですが、**HTTP `/v1/chat/completions` および P2P
+> pipeline の trade 実行パスから呼ばれていません** (tests でのみ
+> 呼ばれる状態)。つまり本章が述べる「stake がないと TRM を稼げない」
+> ルールは **現行 production 運用では enforcement されていません**。
+> 実 gate 配線は Phase 20 で予定しています。
+>
+> 現行プロトコルでは以下が有効です:
+> - Slashing loop (Phase 17 Wave 1.3 — `spawn_slashing_loop`) は
+>   動作。
+> - `StakingPool` に stake することで yield bonus を得られる (§13)。
+> - Welcome loan sunset エポック 2 (Phase 18.2、Constitutional) は
+>   `can_issue_welcome_loan` で enforcement 済。
+>
+> したがって本章の本文は **将来の設計意図** を述べるものです。
+
 > 「何も失うものがない人」を経済ルールで縛るのは不可能だ。
 > Tirami の以前のバージョンは、この失敗を犯していた。Phase 18.2
 > で修正された。

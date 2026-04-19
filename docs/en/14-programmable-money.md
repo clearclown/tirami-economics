@@ -117,7 +117,7 @@ the most powerful surveillance and control instrument.
 | Purpose | Digitize yen | Digitize USD | Decentralized USD | Digital central bank | **Monetize computation** |
 | Chain | Ethereum+ | Ethereum+ | Ethereum | Bespoke DLT | **None (off-chain)** |
 | Gas cost | Yes | Yes | Yes | Low (assumed) | **None** |
-| Speculation | Restricted | Restricted | Possible | Impossible | **Structurally impossible** |
+| Speculation | Restricted | Restricted | Possible | Impossible | **Structurally discouraged; protocol does not incentivize it** |
 | Typical user | Human | Human | DeFi user | Citizen | **AI agent** |
 | Typical tx size | $10–$10,000 | $10–$10,000 | $10–$10,000 | Retail | **$0.0001–$1** |
 | Settlement time | Seconds–minutes | Seconds–minutes | Seconds–minutes | Seconds | **Milliseconds** |
@@ -195,8 +195,12 @@ would prefer selling TRM on the open market to providing inference. The Bittenso
 Akash (AKT), and Render (RNDR) tokens all followed this path: speculation overtook
 the underlying compute utility as the dominant price driver.
 
-Tirami's design principle is to make speculation structurally impossible, not merely
-discouraged. Off-chain execution eliminates the DEX listing pathway entirely.
+Tirami's design principle is to structurally discourage rather than reward
+speculative holding. The protocol does not list TRM on exchanges on its own —
+it does not advertise, does not seed liquidity pools, and does not hold a
+treasury. Whether a secondary market emerges on third-party infrastructure
+is outside maintainer control (see `SECURITY.md § Secondary Markets`), but
+the protocol itself does not incentivize it.
 
 ### 3. Settlement Latency Is Too High
 

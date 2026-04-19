@@ -232,21 +232,29 @@ REFERRAL_COOLDOWN_HOURS = 24              // 紹介間の最小間隔
 | **Rare** | 14-70B params | 8 TRM/token | 3.0× | 24.0 TRM/token |
 | **Legendary** | 70B+ params | 20 TRM/token | 10.0× | 200.0 TRM/token |
 
-### 5.2 ハードウェア投資の正当化
+### 5.2 ハードウェアティア間の相対効率
+
+USD や法定通貨で ROI を示すことは本リポジトリの立場では行わない
+(SECURITY.md § Secondary Markets)。ここではハードウェアティアが
+TRM 発行式 (§5.1) の tier multiplier を通じて得る **compute
+throughput あたりの TRM 量** を比較する。
 
 Mac Mini M4 (Small tier):
-- 年間 ~5M tokens 処理 × 1.0 TRM/token = **5,000,000 TRM/年**
-- 電気代 ~$100/年
-- ROI: 5M TRM / $100 = 50,000 TRM/$
+- 年間 ~5M tokens 処理 × 1.0 TRM/token (Small 倍率) = 5,000,000 TRM/年
+- エネルギー消費: 低 (一般家庭の通常運用範囲)
 
 NVIDIA A100 (Large tier):
-- 年間 ~50M tokens 処理 × 24.0 TRM/token = **1,200,000,000 TRM/年**
-- 電気代 ~$3,000/年
-- ROI: 1.2B TRM / $3,000 = 400,000 TRM/$
+- 年間 ~50M tokens 処理 × 24.0 TRM/token (Large 倍率) = 1,200,000,000 TRM/年
+- エネルギー消費: 高 (データセンター / プロ用 GPU)
 
-**A100 の ROI は Mac Mini の 8 倍** — ハードウェア投資が報われる。
-ただし、供給上限があるので A100 が大量に参入すると supply_factor が下がり、
-Mac Mini との差は縮小する。自然な均衡。
+A100 の **TRM/token 倍率が 24×**、**throughput が 10×** なので、
+Large tier は Small tier より単位時間で多くの TRM を発行できる。
+しかし供給上限 (§2 の 21 B) により、Large tier が大量に参入すると
+`supply_factor` が下がり、tier 間の発行速度差は均衡点に収束する。
+
+重要: この節は「所有するハードウェアが TRM をどれだけ発行できるか」
+の相対分析であって、「TRM を USD 換算でいくら稼げるか」の話では
+ない。二次市場で付く値段は本プロジェクトの関与範囲外。
 
 ---
 
@@ -422,7 +430,7 @@ Tirami: mint_rate → 0 のとき、取引手数料が唯一の報酬
 | 4 年ごとの半減期 | **累計発行量 50% ごとの半減期** | 利回り半減 |
 | SHA-256 PoW | **推論 PoUW** | 仕事の証明 |
 | ASIC マイニング | **GPU + Legendary tier** | ハードウェア投資 |
-| HODL | **Staking (7-365 日)** | 保持動機 |
+| 長期保持 (いわゆる HODL) | **Staking (7-365 日)** | 保持動機 |
 | ネットワーク手数料 | **取引手数料 1% (供給枯渇後)** | 長期維持 |
 | 51% 攻撃 → フォーク | **Collusion → Slashing** | 不正抑止 |
 | 難易度調整 | **EMA 価格 + supply_factor** | 自動調整 |

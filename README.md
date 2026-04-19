@@ -2,13 +2,46 @@
 
 > 経済学を知らなくても大丈夫。ここから始めよう。
 
-**Status (2026-04-19):** Tirami 実装は Phase 19 到達。このリポジトリの経済論は §1–§18 までカバー:
-- §15 [Constitutional Parameters](docs/15-constitutional-parameters.md) — 憲法的に改変不能な不変量 (Phase 18.1)
-- §16 [Stake-Required Mining](docs/16-stake-required-mining.md) — TRM を稼ぐのに stake を要求する (Phase 18.2)
-- §17 [Proof of Useful Work — zkML](docs/17-proof-of-useful-work.md) — 計算結果の暗号的証明 (Phase 18.3)
-- §18 [Secondary Markets & Tokenization](docs/18-secondary-markets.md) — 二次市場リスクの明示放棄 (Phase 19)
+---
 
-詳細: [`spec/parameters.md`](spec/parameters.md) (v0.5、§20–§25 追加)。
+## ⚠️ 読む前に — 立場の明示
+
+- **TRM は金融商品ではありません。**計算の会計単位 (1 TRM = 10⁹ FLOP) です。
+- メンテナは TRM を **販売しない / 宣伝しない / 投機しない / 第三者による二次市場取引に関与しない**。
+- MIT ライセンスの OSS であるため、メンテナの**知らないところで第三者が** TRM をブリッジ・上場・デリバティブ化することを技術的に防ぐ手段はありません。そうした二次市場のリスクは、**関わる人が自己責任で引き受ける**という立場です。
+- ICO / pre-sale / airdrop / private round / team treasury は **存在しません**。開発者も一般プロバイダとして普通に TRM を稼ぐ以外の経路で TRM を所有する仕組みはありません。
+- 詳細: [tirami/SECURITY.md § Secondary Markets](https://github.com/clearclown/tirami/blob/main/SECURITY.md#secondary-markets--third-party-tokenization) / [`docs/18-secondary-markets.md`](docs/18-secondary-markets.md)。
+
+---
+
+## Status Honesty (2026-04-19)
+
+Tirami 実装 ([clearclown/tirami](https://github.com/clearclown/tirami)) は Phase 19 到達。**何が動いていて何がまだ設計段階なのか**を明記します:
+
+✅ **Functional today** (1 192 Rust unit tests + 15 Solidity tests pass):
+- HTTP チャット推論 + iroh P2P forward による dual-signed TRM trade
+- 128-bit nonce によるリプレイ攻撃防御 (`execute_signed_trade`)
+- Collusion detector + Slashing loop (production で常時稼働)
+- Welcome loan + Constitutional sunset エポック 2
+- Governance proposals (21 mutable parameters, 18 憲法的不変)
+- Staking pool + Referral + Ledger persistence
+
+🟡 **Scaffolded (spec & types exist, but not production-wired)**:
+- zkML proof-of-inference: `MockBackend` のみ (shape test 用で暗号的に無効)。ezkl / risc0 統合は Phase 20+ の予定 ([§17 参照](docs/17-proof-of-useful-work.md))。
+- Stake-required mining gate: 関数 `can_provide_inference` は実装済みだが HTTP/P2P trade 実行パスで enforce されていない ([§16 参照](docs/16-stake-required-mining.md))。
+- ML-DSA post-quantum hybrid signatures: 実装存在、default off (iroh 依存衝突のため)。
+- TEE attestation (Apple Secure Enclave / NVIDIA H100 CC): scaffold のみ。
+- Daemon-mode worker の gossip recv ループ (peer auto-discovery、issue #88)。
+
+❌ **Not done**:
+- External security audit (Phase 17 Wave 3.3 の gate — candidates: Trail of Bits, Zellic, Open Zeppelin, Least Authority)。
+- Base L2 mainnet deploy (`make deploy-base-mainnet` は `AUDIT_CLEARANCE=yes` + `MULTISIG_OWNER` + 対話プロンプトの 3 連鎖で gated、監査完了まで実行拒否)。
+- Live bug bounty (PGP 鍵は placeholder 明記、プログラム未稼働)。
+- 10-ノード 7-日 stress test、Base Sepolia 30-日 stable 運用。
+
+**このリポジトリの経済論** (`docs/00–18.md` + `spec/*`) は上記の Status を前提としています。特に §16–§17 は「将来の設計意図」として記述され、現状の production 動作ではないことを各章冒頭で明記しています。
+
+---
 
 ## これは何？
 
